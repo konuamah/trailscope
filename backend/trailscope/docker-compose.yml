@@ -1,0 +1,26 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  web:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=trailscope.settings
+
+  db:
+    image: postgis/postgis:15-3.3
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=geodjango
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=password
+
+volumes:
+  postgis_data:
