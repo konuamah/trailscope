@@ -9,30 +9,58 @@ from django.contrib.gis.measure import D
 from .models import Trail
 from .serializers import TrailSerializer
 
+
 class TrailListCreateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    """
+    List all trails or create a new trail with dynamic filters.
+    """
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]  # Only authenticated users can POST
+        return []  # No permissions required for GET
 
     def get(self, request):
-        # Get query parameters for filtering
-        status_filter = request.query_params.get('status')
-        difficulty = request.query_params.get('difficulty')
-        
+        # Get query parameters for dynamic filtering
+        status_filter = request.query_params.get('status')  # e.g., "open", "closed"
+        difficulty = request.query_params.get('difficulty')  # e.g., "easy", "hard"
+        created_by = request.query_params.get('created_by')  # Filter by user ID
+        limit = request.query_params.get('limit')  # Number of results to retrieve
+        order_by = request.query_params.get('order_by', 'id')  # Default order by 'id'
+
         # Start with all trails
         trails = Trail.objects.all()
-        
-        # Apply filters if provided
+
+        # Apply filters dynamically
         if status_filter:
             trails = trails.filter(status=status_filter)
         if difficulty:
             trails = trails.filter(difficulty_rating=difficulty)
-            
+        if created_by:
+            trails = trails.filter(created_by__id=created_by)
+
+        # Ordering
+        if order_by:
+            trails = trails.order_by(order_by)
+
+        # Limit results
+        if limit:
+            try:
+                limit = int(limit)
+                trails = trails[:limit]
+            except ValueError:
+                return Response(
+                    {"error": "Invalid 'limit' parameter. Must be a number."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Serialize and return results
         serializer = TrailSerializer(trails, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        # Pass the request context to the serializer
+        # Serialize and validate incoming trail data
         serializer = TrailSerializer(data=request.data, context={'request': request})
-        
         if serializer.is_valid():
             serializer.save(created_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -75,7 +103,7 @@ class NearbyTrailsAPIView(APIView):
         return Response(serializer.data)
 
 class TrailDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    
 
     def get_object(self, pk):
         return get_object_or_404(Trail, pk=pk)

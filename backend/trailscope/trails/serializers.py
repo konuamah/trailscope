@@ -9,8 +9,8 @@ class TrailSerializer(serializers.ModelSerializer):
         model = Trail
         fields = ['id', 'name', 'description', 'geometry', 'elevation_profile',
                  'difficulty_rating', 'length_meters', 'created_by', 'created_at',
-                 'status', 'metadata']
-        read_only_fields = ['id', 'created_by', 'created_at']
+                 'status', 'metadata', 'image', 'username']  # Include image field
+        read_only_fields = ['id', 'created_by', 'created_at', 'username']
 
     def validate_geometry(self, value):
         try:

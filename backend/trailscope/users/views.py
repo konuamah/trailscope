@@ -24,43 +24,31 @@ class UserListCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserDetailView(APIView):
-    permission_classes = (IsAuthenticated,)
-    
-    def get(self, request, pk):
-        # Add check to ensure users can only access their own data unless they're admin
-        if not request.user.is_staff and request.user.id != pk:
-            return Response(
-                {"detail": "You do not have permission to access this user's data."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        user = get_object_or_404(User, pk=pk)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def put(self, request, pk):
-        # Add check to ensure users can only modify their own data unless they're admin
-        if not request.user.is_staff and request.user.id != pk:
-            return Response(
-                {"detail": "You do not have permission to modify this user's data."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        user = get_object_or_404(User, pk=pk)
+
+    def get(self, request, username, *args, **kwargs):
+        try:
+            user = User.objects.get(username=username)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=404)
+
+    def put(self, request, username):
+        user = get_object_or_404(User, username=username)
         serializer = UserSerializer(user, data=request.data, partial=True)
+        
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def delete(self, request, pk):
-        # Add check to ensure users can only delete their own account unless they're admin
-        if not request.user.is_staff and request.user.id != pk:
-            return Response(
-                {"detail": "You do not have permission to delete this user."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        user = get_object_or_404(User, pk=pk)
+
+    def delete(self, request, username):
+        user = get_object_or_404(User, username=username)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

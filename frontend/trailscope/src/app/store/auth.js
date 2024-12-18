@@ -4,26 +4,42 @@ import axios from 'axios';
 // Set the base URL for axios
 axios.defaults.baseURL = 'http://localhost:8000';
 
-// Zustand Store for Auth State
-const useAuthStore = create((set) => {
-  let token = null;
-
-  // Check if running in the browser
-  if (typeof window !== "undefined") {
-    token = localStorage.getItem('token'); // Safe access to localStorage
-  }
-
-  const isAuthenticated = !!token;
-
+// Helper function to initialize auth state from localStorage
+const initializeAuthState = () => {
+  if (typeof window === "undefined") return { token: null, user: null };
+  
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  
   return {
-    user: null,            
-    token,          
-    isAuthenticated,  
+    token,
+    user,
+    isAuthenticated: !!token
+  };
+};
 
-    // Register User
+// Set up axios interceptor to add token to requests
+const setupAxiosInterceptors = (token) => {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+  }
+};
+
+const useAuthStore = create((set) => {
+  // Initialize state from localStorage
+  const initialState = initializeAuthState();
+  
+  // Set up axios interceptor with initial token
+  setupAxiosInterceptors(initialState.token);
+  
+  return {
+    ...initialState,
+    
     register: async (username, email, password) => {
       try {
-        console.log("Attempting to register with", { username, email, password });
         const response = await axios.post('/users/register/', {
           username,
           email,
@@ -31,55 +47,60 @@ const useAuthStore = create((set) => {
         });
         console.log("Registration successful:", response.data);
         alert("Registration successful");
-        return true; 
+        return true;
       } catch (error) {
         console.error("Registration failed", error.response?.data || error.message);
-        return false; 
+        return false;
       }
     },
 
-    // Login User
     login: async (username, password) => {
       try {
-        console.log("Attempting to login with", { username, password });
         const response = await axios.post('/users/login/', {
           username,
           password,
         });
-
         const { token, user } = response.data;
-        console.log("Login successful:", { token, user });
-
+        
+        // Update localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+        
+        // Update axios headers
+        setupAxiosInterceptors(token);
+        
+        // Update store state
         set({
           user,
           token,
           isAuthenticated: true,
         });
-
-        if (typeof window !== "undefined") {
-          localStorage.setItem('token', token);
-          console.log("Token stored in localStorage");
-        }
         
-        return true; 
+        return true;
       } catch (error) {
         console.error("Login failed", error.response?.data || error.message);
-        return false; 
+        return false;
       }
     },
 
-    // Logout User
     logout: () => {
-      console.log("Logging out...");
+      // Clear localStorage
+      if (typeof window !== "undefined") {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+      
+      // Clear axios headers
+      setupAxiosInterceptors(null);
+      
+      // Reset store state
       set({
         user: null,
         token: null,
         isAuthenticated: false,
       });
-      if (typeof window !== "undefined") {
-        localStorage.removeItem('token');  
-        console.log("Token removed from localStorage");
-      }
     },
   };
 });
