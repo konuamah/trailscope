@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     // Fetch data from the API
     axios
-      .get("http://localhost:8000/trails/trails/?limit=3")
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/trails/trails/?limit=3`)
       .then((response) => {
         // Map response to extract required fields
         const filteredTrails = response.data.map((trail) => ({
@@ -32,6 +32,8 @@ export default function Home() {
         console.error(err);
       });
   }, []);
+
+  console.log("API URL:", process.env.API_URL);
 
   return (
     <div>
@@ -105,7 +107,7 @@ export default function Home() {
           <Link href={`trail_detail/${trail.id}`} class="group">
             <h2 class="text-black text-lg font-bold group-hover:text-blue-700">{trail.name}</h2>
             <img
-              src={`http://localhost:8000${trail.image}`} // Update URL for images
+              src={`${process.env.NEXT_PUBLIC_API_URL}/${trail.image}`} // Update URL for images
               alt={trail.name}
               class="w-full h-auto border border-blue-500 rounded-md shadow-md mt-2"
             />

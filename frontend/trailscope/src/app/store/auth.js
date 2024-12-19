@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 
 // Set the base URL for axios
-axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 // Helper function to initialize auth state from localStorage
 const initializeAuthState = () => {

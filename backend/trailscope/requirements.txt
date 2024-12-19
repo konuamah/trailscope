@@ -7,3 +7,4 @@ gunicorn==21.2.0
 GDAL==3.6.2
 django-cors-headers
 pillow
+python-dotenv

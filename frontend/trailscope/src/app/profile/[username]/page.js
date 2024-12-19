@@ -22,7 +22,7 @@ export default function Profile() {
       }
 
       try {
-        const response = await axios.get(`http://localhost:8000/users/users/${username}`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/users/${username}`, {
           headers: {
             'Authorization': `Token ${token}`,
             'Content-Type': 'application/json'
@@ -56,7 +56,7 @@ export default function Profile() {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/users/users/${username}/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/users/users/${username}/`,
         { username: newUsername },
         {
           headers: {

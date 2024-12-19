@@ -3,73 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-control-geocoder/dist/Control.Geocoder.css';  // Import geocoder styles
 import useAuthStore from '../store/auth';
+import SearchControl from '../components/searchControl';
 
-// Function to calculate line length and elevation profile
 
-const SearchControl = ({ searchQuery, setSearchQuery }) => {
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const map = useMap();
 
-  const searchLocation = async (query) => {
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
-      );
-      const data = await response.json();
-      setSuggestions(data.slice(0, 5));
-      setShowSuggestions(true);
-    } catch (error) {
-      console.error('Search error:', error);
-    }
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    const lat = parseFloat(suggestion.lat);
-    const lon = parseFloat(suggestion.lon);
-    map.setView([lat, lon], 13);
-    setSearchQuery(suggestion.display_name);
-    setSuggestions([]);
-    setShowSuggestions(false);
-  };
-
-  return (
-    <div className="absolute top-4 left-4 z-[1000] w-64">
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search Location"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            if (e.target.value.length > 2) {
-              searchLocation(e.target.value);
-            } else {
-              setSuggestions([]);
-              setShowSuggestions(false);
-            }
-          }}
-          className="w-full p-2 border rounded"
-        />
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute w-full bg-white border rounded mt-1 max-h-60 overflow-y-auto">
-            {suggestions.map((suggestion, index) => (
-              <div
-                key={index}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion.display_name}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 
 
@@ -224,7 +162,7 @@ const TrailCreationForm = () => {
     }
   
     try {
-      const response = await fetch('http://localhost:8000/trails/trails/', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/trails/trails/`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${useAuthStore.getState().token}`,
@@ -250,21 +188,7 @@ const TrailCreationForm = () => {
   
   
 
-    // Function to search for a location
-    const handleSearch = () => {
-      const map = useMap();
-      const geocoder = L.Control.Geocoder.nominatim();
-  
-      geocoder.geocode(searchQuery, (results) => {
-        if (results.length > 0) {
-          const { lat, lon } = results[0].center;
-          map.setView([lat, lon], 13); // Zoom in to the location
-          setCoordinates([[lat, lon]]); // Set the clicked coordinate
-        } else {
-          alert("Location not found");
-        }
-      });
-    };
+   
 
 
   // Image upload handler
@@ -364,7 +288,7 @@ const TrailCreationForm = () => {
     <SearchControl searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
   </div>
   <TileLayer
-    url="https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=sk.eyJ1Ijoia29maW93dXN1IiwiYSI6ImNtMWV3Z3FkYjMyeW0ya3NjNW93NHk3Z2gifQ.NVzlEBzcmoK-Bdeye-N_LQ"
+    url={`https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`}
     attribution="&copy; Mapbox"
     tileSize={512}
     zoomOffset={-1}
@@ -384,7 +308,7 @@ const TrailCreationForm = () => {
       )}
   
       {trailMetrics && (
-        <div className="mt-8 p-4 border-4 border-gray-800 bg-gray-200">
+        <div className="mt-8 p-4 border-4 border-gray-800 text-black bg-gray-200">
           <h3 className="text-2xl font-bold">Trail Metrics</h3>
           <p className="text-lg">Length: {trailMetrics.length.toFixed(2)} meters</p>
           <p className="text-lg">Elevation Points: {trailMetrics.elevationProfile.length}</p>

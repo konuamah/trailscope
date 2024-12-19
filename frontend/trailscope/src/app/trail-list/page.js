@@ -20,7 +20,7 @@ const TrailListPage = () => {
     fetchTrails();
   }, [filters]);
 
-  axios.defaults.baseURL = "http://localhost:8000";
+  axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
 
   const fetchTrails = async () => {
     setLoading(true);
@@ -75,12 +75,12 @@ const TrailListPage = () => {
                     <Link href={`trail_detail/${trail.id}`} className="group">
                       <h2 className="text-black text-lg font-bold group-hover:text-blue-700">{trail.name}</h2>
                       <img
-                        src={`http://localhost:8000${trail.image}`}
-                        alt={trail.name}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/${trail.image}`} // Update URL for images
+              alt={trail.name}
                         className="w-full h-auto border border-blue-500 rounded-md shadow-md mt-2"
                       />
                       <p className="mt-2 text-gray-700 text-sm">
-                        Difficulty: <span className="font-bold">{trail.difficulty}</span>
+                        Difficulty: <span className="font-bold text-black">{trail.difficulty_rating}</span>
                       </p>
                     </Link>
                   </li>

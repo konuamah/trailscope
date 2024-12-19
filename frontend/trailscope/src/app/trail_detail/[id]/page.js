@@ -44,7 +44,7 @@ const TrailDetailPage = () => {
         try {
           setLoading(true);
           const response = await fetch(
-            `http://localhost:8000/trails/trails/${id}/`
+            `${process.env.NEXT_PUBLIC_API_URL}/trails/trails/${id}/`
           );
   
           if (!response.ok) {
@@ -132,8 +132,8 @@ const TrailDetailPage = () => {
           <span className="font-bold">Length:</span> {trail.length_meters} meters
         </p>
         <img
-          src={`http://localhost:8000${trail.image}`}
-          alt={trail.name}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/${trail.image}`} // Update URL for images
+              alt={trail.name}
           className="w-full h-auto rounded-md border border-blue-500 shadow-md mt-4 mb-4"
         />
         <p className="mb-2">
