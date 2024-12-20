@@ -1,6 +1,5 @@
 # TrailScope
-
-TrailScope is an interactive platform that allows users to create, analyze, and explore trails. It leverages Django for the backend and Next.js for the frontend to offer a seamless and intuitive user experience.
+TrailScope is an early 2000s-themed interactive platform that allows users to create, analyze, and explore trails. It leverages Django for the backend and Next.js for the frontend to offer a seamless and intuitive user experience.
 
 ## Features
 
