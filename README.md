@@ -41,9 +41,9 @@ With TrailScope, planning, creating, and analyzing trails is simple and efficien
 
 ## Tech Stack
 
-- **Backend**: Django, Django REST Framework, PostgreSQL (PostGIS for GIS functionality)
+- **Backend**: Django, Django REST Framework, PostgreSQL (PostGIS for GIS functionality), Docker
 - **Frontend**: Next.js, React, Tailwind CSS, Mapbox for interactive maps
-- **Deployment**: Render (for hosting the backend)
+
 
 ## Getting Started
 
@@ -105,16 +105,5 @@ Make sure you have the following tools installed:
     ```bash
     npm run dev  # or yarn dev
     ```
-
-### Deploying on Render
-
-To deploy this project, follow these steps:
-
-1. Push your code to GitHub.
-2. Connect the backend and frontend repositories to Render.
-3. Set up environment variables on Render for both the backend and frontend.
-4. Deploy the application and monitor logs for successful deployment.
-
-## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
